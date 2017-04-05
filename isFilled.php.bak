@@ -1,0 +1,323 @@
+﻿
+<!DOCTYPE html>
+ <html>
+ <head>
+	<meta http-equiv="content-Type" content="text/html;charset=utf-8">
+	<title>网上考核</title>
+	<style>
+		body{
+			margin:20px auto;
+			width :500px;
+			border:1px solid #A2D6E3;
+			padding-left:12px;
+		}
+	</style>
+</head>
+<body>
+<?php
+//功能：供查询有哪些人还未填写
+require_once "SqlTool.class.php";
+
+//renshi_zhuguan_score
+$sql="select id_name,total_score,buzhang_advice,check_advice,zhuguan_feedback,leader_advice from renshi_zhuguan_score";
+$SqlTool=new SqlTool();
+$res_1=$SqlTool->execute_dql($sql);
+while($row=mysql_fetch_assoc($res_1)){
+	$id_name=$row['id_name'];
+	
+	$total_score=$row['total_score'];
+	$buzhang_advice=$row['buzhang_advice'];
+	$check_advice=$row['check_advice'];
+	$leader_advice=$row['leader_advice'];
+	$zhuguan_feedback=$row['zhuguan_feedback'];
+	
+	
+	if(!$total_score||!$leader_advice){
+		echo "{$id_name}考核表未填写---->季杰";
+		echo '<br>';
+	}
+	if(!$zhuguan_feedback){
+		echo "{$id_name}主管反馈未填写---->$id_name";
+		echo '<br>';
+	}
+	if(!$buzhang_advice){
+		$sql="select apartment from main_tb where name=\"$id_name\"";
+		$res_2=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_2);
+		$apartment=$row['apartment'];
+		mysql_free_result($res_2);
+		
+		$sql="select name from main_tb where apartment=\"$apartment\" and position = '部长'";
+		$res_3=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_3);
+		$buzhang_name=$row['name'];
+		echo "{$id_name}部长意见未填写---->$temp_name";
+		echo '<br>';
+		mysql_free_result($res_3);
+
+		/*switch($apartment){
+			case "综合管理部": $temp_name="张焜阳";break;
+			case "俱乐部": $temp_name="王琪";break;
+			case "升升活动中心": $temp_name="孙四振";break;
+			default:$temp_name="error!";break;
+		}
+		echo "{$id_name}部长意见未填写---->$temp_name";
+		echo '<br>';*/
+		
+	}
+}
+mysql_free_result($res_1);
+
+// ren_zong_yuangong
+$sql="select id_name,total_score,self_remark,buzhang_advice,check_advice,zhuguan_remark from  ren_zong_yuangong";
+$SqlTool=new SqlTool();
+$res_1=$SqlTool->execute_dql($sql);
+while($row=mysql_fetch_assoc($res_1)){
+	$id_name=$row['id_name'];
+	
+	$total_score=$row['total_score'];
+	$buzhang_advice=$row['buzhang_advice'];
+	$self_remark=$row['self_remark'];
+	$zhuguan_remark=$row['zhuguan_remark'];
+	//查找上司 、部长
+	$sql="select position,apartment from main_tb where name=\"$id_name\"";
+	$res_3=$SqlTool->execute_dql($sql);
+	$row=mysql_fetch_assoc($res_3);
+	$apartment=$row['apartment'];
+	$position=$row['position'];
+	
+	mysql_free_result($res_3);
+	
+	$sql="select leader from score_relationship_tb where branch =\"$position\"";
+	$res_4=$SqlTool->execute_dql($sql);
+	$row=mysql_fetch_assoc($res_4);
+	$leader_position=$row['leader'];
+	
+	mysql_free_result($res_4);
+	
+	$sql="select name from main_tb where position =\"$leader_position\"";
+	$res_5=$SqlTool->execute_dql($sql);
+	$row=mysql_fetch_assoc($res_5);
+	$leader_name=$row['name'];
+	
+	mysql_free_result($res_5);
+	
+	$sql="select name from main_tb where position =\"部长\" and apartment=\"$apartment\"";
+	$res_6=$SqlTool->execute_dql($sql);
+	$row=mysql_fetch_assoc($res_6);
+	$buzhang_name=$row['name'];
+	
+	mysql_free_result($res_6);
+	
+	
+	if(!$total_score||!$zhuguan_remark){
+		echo "{$id_name}考核表未填写---->$leader_name";
+		echo '<br>';
+	}
+	if(!$self_remark){
+		echo "{$id_name}员工意见未填写---->$id_name";
+		echo '<br>';
+	}
+	if(!$buzhang_advice){
+		/* $sql="select apartment from main_tb where name=\"$id_name\"";
+		$res_2=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_2);
+		$apartment=$row['apartment']; */
+		
+		echo "{$id_name}部长意见未填写---->$buzhang_name";
+		echo '<br>';
+		//mysql_free_result($res_2);
+	}
+}
+mysql_free_result($res_1);
+
+
+//julebu_yuangong
+//shengsheng_yuangong
+$temp=Array(0=>"julebu_yuangong",1=>"shengsheng_yuangong");
+for($i=0;$i<2;$i++){
+	$sql="select id_name,leader_advice,self_remark,other_remark,total_score from {$temp[$i]}";
+	//echo $sql;
+	$SqlTool=new SqlTool();
+	$res_1=$SqlTool->execute_dql($sql);
+
+	if($i==0){
+		$buzhang_name="王琪";
+		$leader_name="王志敏";
+	}else{
+		$buzhang_name="孙四振";
+		$leader_name="王琳";
+	}
+	while($row=mysql_fetch_assoc($res_1)){
+		
+		$leader_advice=$row['leader_advice'];
+		$self_remark=$row['self_remark'];
+		$other_remark=$row['other_remark'];
+		$total_score=$row['total_score'];
+		$id_name=$row['id_name'];
+		
+		
+		if (!$leader_advice||!$total_score){
+			echo "{$id_name}考核表未填写---->$leader_name";
+			echo '<br>';
+		}
+		if(!$self_remark){
+			echo "{$id_name}员工意见未填写---->$id_name";
+			echo '<br>';
+		}
+		if(!$other_remark){
+			echo "{$id_name}他人意见未填写---->$id_name";
+			echo '<br>';
+		}		
+	}
+	mysql_free_result($res_1);	
+	echo '<br>';
+}
+
+//zg_anquan_zhuguan
+//zg_caiwuzu_zhuguan
+//zg_ducha_zhuguan
+//zg_jishu_zhuguan
+//zg_jizhe_zhuguan
+//zg_mishu_zhuguan
+$temp=Array(0=>"zg_anquan_zhuguan",1=>"zg_anquan_zhuguan",2=>"zg_ducha_zhuguan",3=>"zg_jishu_zhuguan",4=>"zg_jizhe_zhuguan",5=>"zg_mishu_zhuguan");
+for($i=0;$i<6;$i++){
+	$sql="select id_name,zuzhang_remark,zu_zhang_score,zg_zhuguan_random_remark,zg_zhuguan_random_score,buzhang_advice,zhuguan_feedback,leader_advice from {$temp[$i]}";
+	$SqlTool=new SqlTool();
+	$res_1=$SqlTool->execute_dql($sql);
+	
+
+	$buzhang_name="张焜阳";
+	$leader_name="尹贵吉";
+	
+	while($row=mysql_fetch_assoc($res_1)){
+		$zuzhang_remark=$row['zuzhang_remark'];
+		$zu_zhang_score=$row['zu_zhang_score'];
+		$zg_zhuguan_random_remark=$row['zg_zhuguan_random_remark'];
+		$zg_zhuguan_random_score=$row['zg_zhuguan_random_score'];
+		$buzhang_advice=$row['buzhang_advice'];
+		$zhuguan_feedback=$row['zhuguan_feedback'];
+		$leader_advice=$row['leader_advice'];
+		
+		
+		$id_name=$row['id_name'];
+		
+		//查找下属
+		$sql="select position,apartment from main_tb where name=\"$id_name\"";
+		$res_3=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_3);
+		$apartment=$row['apartment'];
+		$position=$row['position'];
+		
+		mysql_free_result($res_3);
+		
+		$sql="select branch from score_relationship_tb where leader =\"$position\"";
+		$res_4=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_4);
+		$branch_position=$row['branch'];
+		
+		mysql_free_result($res_4);
+		
+		$sql="select name from main_tb where position =\"$branch_position\"";
+		$res_5=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_5);
+		$branch_name=$row['name'];
+		
+		mysql_free_result($res_5);
+		
+		if (!$leader_advice||!$total_score){
+			echo "{$id_name} 考核表未填写---->$leader_name";
+			echo '<br>';
+		}
+		if(!$zuzhang_remark||!$zu_zhang_score){
+			echo "{$id_name} 组员评分未填写---->$branch_name";
+			echo '<br>';
+		}
+		if(!$zg_zhuguan_random_remark||!$zg_zhuguan_random_score){
+			echo "{$id_name} 组长互评未填写--->$id_name";
+			echo '<br>';
+		}
+		if(!$buzhang_advice){
+			echo "{$id_name} 部长评价未填写--->$buzhang_name";
+			echo '<br>';
+		}
+		if(!$zhuguan_feedback){
+			echo "{$id_name} 主管反馈未填写--->$id_name";
+			echo '<br>';
+		}
+	}
+	mysql_free_result($res_1);	
+	echo '<br>';
+}
+
+
+//zichan_zhuguan_score
+
+	$sql="select id_name,buzhang_advice,check_advice,zhuguan_feedback,leader_advice_by_zichan,leader_advice_by_anquan,total_score_by_zichan,total_score_by_anquan from zichan_zhuguan_score";
+	$SqlTool=new SqlTool();
+	$res_1=$SqlTool->execute_dql($sql);
+	
+	while($row=mysql_fetch_assoc($res_1)){
+		
+		$buzhang_advice=$row['buzhang_advice'];
+		$zhuguan_feedback=$row['zhuguan_feedback'];
+		$leader_advice_by_zichan=$row['leader_advice_by_zichan'];
+		$leader_advice_by_anquan=$row['leader_advice_by_anquan'];
+		$total_score_by_zichan=$row['total_score_by_zichan'];
+		$total_score_by_anquan=$row['total_score_by_anquan'];
+
+		$id_name=$row['id_name'];
+		
+		//查找上级、部长
+		$sql="select position,apartment from main_tb where name=\"$id_name\"";
+		$res_3=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_3);
+		$apartment=$row['apartment'];
+		$position=$row['position'];
+		
+		mysql_free_result($res_3);
+		
+		$sql="select name from main_tb where position=\"部长\" and apartment=\"$apartment\"";
+		$res_4=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_4);
+		$buzhang_name=$row['name'];
+		
+		mysql_free_result($res_4);
+		
+		//获取安全组组长和资产组组长名字
+		$sql="select name from main_tb where position='安全组组长'";
+		$res_5=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_5);
+		$anquan_zuzhang_name=$row['name'];
+		
+		mysql_free_result($res_5);
+		
+		$sql="select name from main_tb where position='资产组组长'";
+		$res_6=$SqlTool->execute_dql($sql);
+		$row=mysql_fetch_assoc($res_6);
+		$zichan_zuzhang_name=$row['name'];
+		
+		mysql_free_result($res_6);
+		
+		if (!$leader_advice_by_zichan||!$total_score_by_zichan){
+			echo "{$id_name} 考核表之资产主管未填写---->$zichan_zuzhang_name";
+			echo '<br>';
+		}
+		if (!$leader_advice_by_anquan||!$total_score_by_anquan){
+			echo "{$id_name} 考核表之安全主管未填写---->$anquan_zuzhang_name";
+			echo '<br>';
+		}
+		
+		if(!$buzhang_advice){
+			echo "{$id_name} 部长评价未填写--->$buzhang_name";
+			echo '<br>';
+		}
+		if(!$zhuguan_feedback){
+			echo "{$id_name} 主管反馈未填写--->$id_name";
+			echo '<br>';
+		}
+	}
+	mysql_free_result($res_1);	
+?>
+</body>
+</html>

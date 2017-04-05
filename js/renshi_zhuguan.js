@@ -1,0 +1,1 @@
+document.document.getElementsByTagName('input')("bj").innerHTML=¡°ÄãºÃ¡±;
